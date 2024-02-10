@@ -10,6 +10,7 @@ import java.util.Set;
 
 /**
  * Test for {@linkplain OpenSSLMessageDigestNative}.
+ *
  * @author Stephan Fuhrmann
  */
 public class OpenSSLMessageDigestNativeTest {
@@ -29,8 +30,6 @@ public class OpenSSLMessageDigestNativeTest {
 
     @Test
     public void freeWithNull() {
-        Assertions.assertThrows(NullPointerException.class, () ->
-            OpenSSLMessageDigestNative.free(null)
-        );
+        Assertions.assertThrows(NullPointerException.class, () -> OpenSSLMessageDigestNative.free(null));
     }
 }
