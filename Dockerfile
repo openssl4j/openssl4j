@@ -13,7 +13,7 @@ RUN (cd build/openssl-3.0.8 && ./Configure --prefix=/openssl enable-fips && make
 FROM debian:11 as openssl4j
 
 ENV JAVA_HOME=/opt/java/openjdk
-COPY --from=eclipse-temurin:21 $JAVA_HOME $JAVA_HOME
+COPY --from=eclipse-temurin:11 $JAVA_HOME $JAVA_HOME
 COPY --from=openssl /openssl/ /openssl
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
