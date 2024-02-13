@@ -79,7 +79,7 @@ jobs:
           context: .
           push: true
           platforms: ${{ matrix.platform }}
-          tags: localhost:5000/$IMAGE_NAME:latest
+          tags: $IMAGE_NAME:latest
 
       -
         name: Log in to the Container registry
