@@ -45,9 +45,9 @@ TEST_INCLUDES+= -I${JAVA_HOME}/include/darwin -I${BASE_DIR}/OpenSSL/include
 libs+= -L${BASE_DIR}/OpenSSL/lib/ ${BASE_DIR}/OpenSSL/lib/libssl.dylib ${BASE_DIR}/OpenSSL/lib/libcrypto.dylib
 else
 $(info Building for RedHat x86)
-INCLUDES+= -I/usr/local/include/openssl 
+INCLUDES+= -I/openssl/include
 TEST_INCLUDES+= -I${JAVA_HOME}/include/linux
-libs+= -L/lib64/ -l:libssl.so.3 -l:libcrypto.so.3
+libs+= -L/openssl/lib64/ -l:libssl.a -l:libcrypto.a -lpthread -ldl
 endif
 
 .PHONY: all
