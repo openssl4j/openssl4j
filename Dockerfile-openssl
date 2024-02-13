@@ -1,0 +1,10 @@
+############
+# OpenSSL compile
+############
+FROM debian:11 as openssl
+RUN apt-get update && apt-get install -y \
+    make gcc wget perl
+RUN mkdir -p ./build && \
+    wget "https://github.com/openssl/openssl/releases/download/openssl-3.0.8/openssl-3.0.8.tar.gz" && \
+    tar -C build --strip-components=1 -xzf openssl-3.0.8.tar.gz
+RUN (cd build && ./Configure --prefix=/openssl enable-fips && make && make install)
