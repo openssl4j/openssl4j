@@ -39,18 +39,26 @@ jobs:
       packages: write
     strategy:
       matrix:
+        openssl: 
+          - version: '3.0.8'
+            opts: enable-fips
+            name: fips
+          - version: '3.2.1'
+            opts:
+            name: plain
         include:
           - platform: linux/amd64
-            artifact: linux_amd64
+            tag: linux_amd64
           - platform: linux/arm64
-            artifact: linux_arm64
+            tag: linux_arm64
           - platform: linux/s390x
-            artifact: linux_s390x
+            tag: linux_s390x
           - platform: linux/arm/v7
-            artifact: linux_arm_v7
+            tag: linux_arm_v7
           - platform: linux/arm/v6
+            tag: linux_arm_v6
           - platform: linux/ppc64le
-            artifact: linux_ppc64le
+            tag: linux_ppc64le
           #- platform: linux/riscv64
           #- platform: linux/386
           #- platform: linux/mips64le
@@ -84,7 +92,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       -
-        name: Build on ${{ matrix.platform }}
+        name: Build on ${{ matrix.platform }}, version ${{ matrix.openssl.version}}, mode ${{ matrix.openssl.name }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -92,4 +100,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           platforms: ${{ matrix.platform }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
+          build-args: |
+            "OPENSSL_VERSION=${{ matrix.openssl.version }}"
+            "OPENSSL_CONFIGOPTS=${{ matrix.openssl.opts }}"
