@@ -46,7 +46,7 @@ jobs:
           - version: '3.2.1'
             opts:
             name: plain
-        include:
+        os:
           - platform: linux/amd64
             tag: linux_amd64
           - platform: linux/arm64
@@ -59,20 +59,17 @@ jobs:
             tag: linux_arm_v6
           - platform: linux/ppc64le
             tag: linux_ppc64le
-          #- platform: linux/riscv64
-          #- platform: linux/386
-          #- platform: linux/mips64le
     steps:
       -
         name: Checkout
         uses: actions/checkout@v4
       -
-        name: Set up QEMU for ${{ matrix.platform }}
+        name: Set up QEMU for ${{ matrix.os.platform }}
         id: qemu
         uses: docker/setup-qemu-action@v3
         with:
           image: ${{ env.QEMU_IMAGE }}
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.os.platform }}
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -92,15 +89,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       -
-        name: Build on ${{ matrix.platform }}, version ${{ matrix.openssl.version}}, mode ${{ matrix.openssl.name }}
+        name: Build on ${{ matrix.os.platform }}, version ${{ matrix.openssl.version}}, mode ${{ matrix.openssl.name }}
         uses: docker/build-push-action@v5
         with:
           context: .
           file: Dockerfile-openssl
           push: ${{ github.event_name != 'pull_request' }}
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.os.platform }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.os.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
           build-args: |
             "OPENSSL_VERSION=${{ matrix.openssl.version }}"
             "OPENSSL_CONFIGOPTS=${{ matrix.openssl.opts }}"
