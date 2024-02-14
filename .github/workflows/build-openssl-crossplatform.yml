@@ -10,29 +10,9 @@ env:
 
 jobs:
   #
-  # show the available qemu platforms to have a list of all platforms
-  #
-  qemu_show_platform_info:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Set up QEMU for all platforms
-        id: qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          image: ${{ env.QEMU_IMAGE }}
-          platforms: all
-      -
-        name: Available platforms
-        run: echo ${{ steps.qemu.outputs.platforms }}
-
-  #
   # build the different platforms using QEMU
   #
-  qemu_platform_object_files:
+  openssl:
     runs-on: ubuntu-latest
     permissions:
       contents: read
