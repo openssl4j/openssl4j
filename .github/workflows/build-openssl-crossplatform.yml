@@ -6,7 +6,7 @@ env:
   QEMU_IMAGE: tonistiigi/binfmt:qemu-v5.0.1
   VERSION_SUFFIX: ''
   REGISTRY: ghcr.io
-  IMAGE_NAME: openssl4l/openssl
+  IMAGE_NAME: openssl4j/openssl
 
 jobs:
   #
