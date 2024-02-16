@@ -4,9 +4,6 @@ on: push
 
 env:
   QEMU_IMAGE: tonistiigi/binfmt:qemu-v5.0.1
-  VERSION_SUFFIX: ''
-  REGISTRY: ghcr.io
-  IMAGE_NAME: openssl4j/openssl
 
 jobs:
   #
@@ -61,23 +58,29 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       -
-        name: Log in to the Container registry ${{ env.REGISTRY }} as ${{ github.actor }}
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      -
         name: Build on ${{ matrix.os.platform }}, version ${{ matrix.openssl.version}}, mode ${{ matrix.openssl.name }}
         uses: docker/build-push-action@v5
         with:
           context: .
           file: Dockerfile-openssl
-          push: ${{ github.event_name != 'pull_request' }}
           platforms: ${{ matrix.os.platform }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.os.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
           build-args: |
             "OPENSSL_VERSION=${{ matrix.openssl.version }}"
             "OPENSSL_CONFIGOPTS=${{ matrix.openssl.opts }}"
+          outputs: "type=tar,dest=image.tar"
+
+      -
+        name: Show the docker image
+        run: |
+          ls -alR image.tar
+          tar -tvf image.tar
+
+      -
+        name: Extract openssl build from container
+        run: |
+          tar -xvf image.tar openssl
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openssl-${{ matrix.os.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
+          path: openssl
