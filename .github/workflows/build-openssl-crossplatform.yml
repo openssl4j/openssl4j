@@ -78,7 +78,7 @@ jobs:
       -
         name: Extract openssl build from container
         run: |
-          tar -xvf image.tar openssl
+          tar -xvf image.tar openssl.tar.gz && tar -xzvf openssl.tar.gz
 
       - uses: actions/upload-artifact@v4
         with:
