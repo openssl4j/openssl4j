@@ -48,7 +48,8 @@ else
 $(info Building for Linux)
 INCLUDES+= -I${openssl_prefix}/include 
 TEST_INCLUDES+= -I${JAVA_HOME}/include/linux
-libs+= -L${openssl_prefix}/lib64/ -l:libssl.so.3 -l:libcrypto.so.3
+# lib and lib64 exist on different systems ... just add both
+libs+= -L${openssl_prefix}/lib/ -L${openssl_prefix}/lib64/ -l:libssl.so.3 -l:libcrypto.so.3
 endif
 
 .PHONY: all
