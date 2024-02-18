@@ -61,7 +61,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       -
-        name: Build on ${{ matrix.platform }}
+        name: Build os tag ${{ matrix.os.tag }}, openssl version ${{ matrix.openssl.version}}, openssl name ${{ matrix.openssl.name }}
         uses: docker/build-push-action@v5
         with:
           context: .
