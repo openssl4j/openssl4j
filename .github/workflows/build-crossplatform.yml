@@ -140,7 +140,7 @@ jobs:
       -
         uses: actions/upload-artifact@v4
         with:
-          name: openssl4j-objects--${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
+          name: openssl4j-objects-openssl-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
           path: openssl4j-objects/target/*.jar
       -
         name: Publish package to Github
