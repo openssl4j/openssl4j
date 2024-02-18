@@ -5,7 +5,6 @@ on: push
 env:
   QEMU_IMAGE: tonistiigi/binfmt:qemu-v5.0.1
   BUILD_JDK: 11
-  VERSION_SUFFIX: ''
   OPENSSL_URL_PREFIX: "https://github.com/openssl4j/openssl-crossplatform/releases/download/v20240217200647/openssl"
 #  OPENSSL_URL: https://github.com/openssl4j/openssl-crossplatform/releases/download/v20240217200647/openssl-linux_386-3.0.8-fips.tar.gz
 
@@ -130,7 +129,7 @@ jobs:
             ${{ runner.os }}-maven-
       -
         name: Set by-date version with Maven
-        run: mvn versions:set -DnewVersion=$(date +"%Y-%m-%d-%H-%M-%S")-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}-${{ env.VERSION_SUFFIX }}
+        run: mvn versions:set -DnewVersion=$(date +"%Y-%m-%d-%H-%M-%S")-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}
         working-directory: openssl4j-objects
       - 
         name: Build with Maven
