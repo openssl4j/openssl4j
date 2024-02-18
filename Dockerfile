@@ -17,7 +17,7 @@ COPY . openssl4j
 ENV JAVA_HOME=/opt/java/openjdk/
 RUN echo "JAVA_HOME    is ${JAVA_HOME}"
 RUN echo "OS_ARCH      is $(cd openssl4j/build-helper && ${JAVA_HOME}/bin/java -Xint OsArch.java)"
-RUN wget "$OPENSSL_URL" -O- | tar -C /-xzf-
+RUN wget "$OPENSSL_URL" -O- | tar -C /-xvzf -
 RUN echo "OpenSSL header files: "
 RUN find / -name "provider.h"
 RUN find / -name "core.h"
