@@ -8,7 +8,7 @@ ARG OPENSSL_NAME=fips
 ARG OPENSSL_URL="https://github.com/openssl4j/openssl-crossplatform/releases/download/v20240217200647/openssl-linux_amd64-3.0.8-fips.tar.gz"
 
 ENV JAVA_HOME=/opt/java/openjdk
-ENV SRC_DIR=/openssl4j
+ENV SRC_DIR=./openssl4j
 COPY --from=eclipse-temurin:11 $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
