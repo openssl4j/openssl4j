@@ -6,6 +6,8 @@ env:
   QEMU_IMAGE: tonistiigi/binfmt:qemu-v5.0.1
   BUILD_JDK: 11
   VERSION_SUFFIX: ''
+  OPENSSL_URL_PREFIX: "https://github.com/openssl4j/openssl-crossplatform/releases/download/v20240217200647/openssl"
+#  OPENSSL_URL: https://github.com/openssl4j/openssl-crossplatform/releases/download/v20240217200647/openssl-linux_386-3.0.8-fips.tar.gz
 
 jobs:
   #
@@ -35,19 +37,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
+        openssl:
+          - version: '3.0.8'
+            name: fips
+          - version: '3.2.1'
+            name: plain
+        os:
           - platform: linux/amd64
-            artifact: linux_amd64
+            tag: linux_amd64
           - platform: linux/arm64
           # - platform: linux/s390x
-          #  artifact: linux_arm64
+          #  tag: linux_arm64
           - platform: linux/s390x
-            artifact: linux_s390x
+            tag: linux_s390x
           - platform: linux/arm/v7
-            artifact: linux_arm_v7
+            tag: linux_arm_v7
           #- platform: linux/arm/v6
           # - platform: linux/ppc64le
-          #   artifact: linux_ppc64le
+          #   tag: linux_ppc64le
           #- platform: linux/riscv64
           #- platform: linux/386
           #- platform: linux/mips64le
@@ -79,6 +86,10 @@ jobs:
           context: .
           platforms: ${{ matrix.platform }}
           outputs: "type=tar,dest=image.tar"
+          build-args: |
+            "OPENSSL_VERSION=${{ matrix.openssl.version }}"
+            "OPENSSL_NAME=${{ matrix.openssl.name }}"
+            "OPENSSL_URL=${{ env.OPENSSL_URL_PREFIX }}-${{ matrix.os.tag }}-${{ matrix.openssl.version }}-${{ matrix.openssl.name }}.tar.gz"
       -
         name: Show it
         run: |

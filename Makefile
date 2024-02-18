@@ -17,7 +17,7 @@ JNI_C_SOURCES=openssl4j/src/main/c
 JNI_C_TEST_SOURCES=openssl4j/src/test/c
 TARGET=${BASE_DIR}/openssl4j/c
 INSTALL_TARGET=openssl4j/src/main/resources/objects
-JNI_JAVA_FILES=${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLMessageDigestNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLCipherNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLCryptoNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLSecureRandomNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLMacNative.java
+JNI_JAVA_FILES=${JNI_JAVA_SOURCES}/de/sfuhrm/openssql4j/OpenSSLMessageDigestNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLCipherNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLCryptoNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLSecureRandomNative.java ${JNI_JAVA_SOURCES}/de/sfuhrm/openssl4j/OpenSSLMacNative.java
 JNI_HEADER_FILES=${TARGET}/include/de_sfuhrm_openssl4j_OpenSSLMessageDigestNative.h ${TARGET}/include/de_sfuhrm_openssl4j_OpenSSLCipherNative.h ${TARGET}/include/de_sfuhrm_openssl4j_OpenSSLCryptoNative.h ${TARGET}/include/de_sfuhrm_openssl4j_OpenSSLSecureRandomNative.h ${TARGET}/include/de_sfuhrm_openssl4j_OpenSSLMacNative.h
 empty:=
 space:= $(empty) $(empty)
@@ -27,6 +27,7 @@ UNAME_S := $(shell uname -s)
 
 libs:=
 test_libs := ${TARGET}/libopenssl4j-${JAVA_OS_ARCH}.so
+openssl_prefix := /openssl
 
 INCLUDES= -I${TARGET}/include/ -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/usr/local/include/openssl
 TEST_INCLUDES = -I${TARGET}/include/ -I${JNI_C_SOURCES}/ -I${JAVA_HOME}/include -I/usr/local/include/openssl
@@ -44,10 +45,10 @@ INCLUDES+= -I${JAVA_HOME}/include/darwin -I${BASE_DIR}/OpenSSL/include
 TEST_INCLUDES+= -I${JAVA_HOME}/include/darwin -I${BASE_DIR}/OpenSSL/include
 libs+= -L${BASE_DIR}/OpenSSL/lib/ ${BASE_DIR}/OpenSSL/lib/libssl.dylib ${BASE_DIR}/OpenSSL/lib/libcrypto.dylib
 else
-$(info Building for RedHat x86)
-INCLUDES+= -I/usr/local/include/openssl 
+$(info Building for Linux)
+INCLUDES+= -I${openssl_prefix}/include 
 TEST_INCLUDES+= -I${JAVA_HOME}/include/linux
-libs+= -L/lib64/ -l:libssl.so.3 -l:libcrypto.so.3
+libs+= -L${openssl_prefix}/lib64/ -l:libssl.so.3 -l:libcrypto.so.3
 endif
 
 .PHONY: all

@@ -1,5 +1,12 @@
 FROM debian:11
 
+# for example 3.0.8
+ARG OPENSSL_VERSION
+# plain or fips
+ARG OPENSSL_NAME
+# url for downloading the platform binaries
+ARG OPENSSL_URL
+
 ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:11 $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
@@ -10,8 +17,7 @@ COPY . openssl4j
 ENV JAVA_HOME=/opt/java/openjdk/
 RUN echo "JAVA_HOME    is ${JAVA_HOME}"
 RUN echo "OS_ARCH      is $(cd openssl4j/build-helper && ${JAVA_HOME}/bin/java -Xint OsArch.java)"
-RUN wget "https://github.com/openssl/openssl/releases/download/openssl-3.0.8/openssl-3.0.8.tar.gz" && mkdir -p ./build && tar -C build -xzf openssl-3.0.8.tar.gz
-RUN (cd build/openssl-3.0.8 && ./Configure enable-fips && make && make install)
+RUN wget "$OPENSSL_URL" -O- && tar -C /-xzf-
 RUN echo "OpenSSL header files: "
 RUN find / -name "provider.h"
 RUN find / -name "core.h"
