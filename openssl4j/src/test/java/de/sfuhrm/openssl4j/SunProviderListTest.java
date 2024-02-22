@@ -1,12 +1,11 @@
 package de.sfuhrm.openssl4j;
 
-import org.junit.jupiter.api.Test;
-
 import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.TreeSet;
+import org.junit.jupiter.api.Test;
 
 /**
  * Lists the registered Security providers.

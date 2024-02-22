@@ -8,7 +8,7 @@ package de.sfuhrm.openssl4j;
 public final class MessageDigest {
 
     private MessageDigest() {
-        // no instances allowed
+        // No instances allowed.
     }
 
     /**

@@ -1,12 +1,11 @@
 package de.sfuhrm.openssl4j;
 
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * JCA provider directing all calls to the system native OpenSSL library.
@@ -15,10 +14,29 @@ import java.util.regex.Pattern;
  */
 public final class OpenSSL4JProvider extends Provider {
 
-    /** The provider name as passed to JCA. */
-    public final static String PROVIDER_NAME = "OpenSSL4J";
+    /** The provider name passed to JCA. */
+    public static final String PROVIDER_NAME = "OpenSSL4J";
 
-    private static Set<String> openSslMessageDigestAlgorithms;
+    public static final String PROVIDER_INFO = PROVIDER_NAME + " JSP/JCE";
+
+    private OpenSSLCryptoNative crypto = new OpenSSLCryptoNative();
+
+    private static OpenSSL4JProvider instance = null;
+
+    /**
+     * Constructor for the JCA Provider for OpenSSL JNI.
+     *
+     * @throws IllegalStateException
+     *             if the native object file can't be loaded and the class can't be used.
+     */
+
+    public static synchronized OpenSSL4JProvider getInstance() {
+        if (OpenSSL4JProvider.instance == null) {
+            OpenSSL4JProvider.instance = new OpenSSL4JProvider();
+        }
+
+        return OpenSSL4JProvider.instance;
+    }
 
     /**
      * Constructor for the JCA Provider for OpenSSL JNI.
@@ -31,15 +49,23 @@ public final class OpenSSL4JProvider extends Provider {
                 + ", implementing " + "multiple message digest algorithms.");
 
         try {
+
+            // Load.
             NativeLoader.loadAll();
-            if (openSslMessageDigestAlgorithms == null) {
-                openSslMessageDigestAlgorithms = OpenSSLMessageDigestNative.getMessageDigestList();
+
+            // Initialize sets of names if not already initialized.
+            if (OpenSSL4JProviderUtils.openSslMessageDigestAlgorithms == null) {
+                OpenSSL4JProviderUtils.openSslMessageDigestAlgorithms = OpenSSLMessageDigestNative
+                        .getMessageDigestList();
+            }
+            if (OpenSSL4JProviderUtils.openSslCiphers == null) {
+                OpenSSL4JProviderUtils.openSslCiphers = OpenSSLCipherNative.getCipherList();
             }
 
             Map<String, String> names = getNames(openSslMessageDigestAlgorithms);
             putAll(names);
         } catch (IOException e) {
-            throw new IllegalStateException("Could not initialize", e);
+            throw new IllegalStateException("Could not initialize: " + e.getMessage(), e);
         }
     }
 

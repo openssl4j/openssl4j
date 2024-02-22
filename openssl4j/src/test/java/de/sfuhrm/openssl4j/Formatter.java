@@ -9,7 +9,6 @@ public final class Formatter {
 
     /** Only singleton. */
     private Formatter() {
-
     }
 
     /** Lazily initialized singleton. */

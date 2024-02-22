@@ -1,5 +1,10 @@
 package de.sfuhrm.openssl4j;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -7,11 +12,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Transfers the object files from the JAR file to a temporary directory. The temporary directory will be deleted when
@@ -22,14 +29,22 @@ import java.util.Set;
 final class ObjectTransfer {
 
     /** The destination temporary directory. */
-    private final Path targetDirectory;
+    private Path targetDirectory;
 
     /** The libraries copies. */
     private final List<Path> libraries;
 
+    private static Pattern linuxLibRegex = Pattern.compile("(\\w+)(\\.\\d+)?");
+
+    public Path getTargetDir() {
+        return targetDirectory;
+    }
+
     ObjectTransfer() throws IOException {
         targetDirectory = Files.createTempDirectory("native");
+
         libraries = new ArrayList<>();
+
         Runnable removeTarget = () -> {
             for (Path p : libraries) {
                 try {
@@ -61,7 +76,6 @@ final class ObjectTransfer {
      */
     static String getSystemPropertyAlnum(String property) {
         Objects.requireNonNull(property);
-
         final String value = System.getProperty(property);
         Objects.requireNonNull(value, "System property " + property + " is null");
         StringBuilder result = new StringBuilder(value.length());
@@ -76,7 +90,7 @@ final class ObjectTransfer {
         return result.toString();
     }
 
-    private static String getOsName() {
+    public static String getOsName() {
         return getSystemPropertyAlnum("os.name");
     }
 
@@ -84,8 +98,27 @@ final class ObjectTransfer {
         return getSystemPropertyAlnum("os.arch");
     }
 
-    static String toLibraryName(String name) {
-        return name + "-" + getOsName() + "-" + getArchName() + ".so";
+    public static String toLibraryName(String name) {
+        switch (name) {
+        case "libopenssl4j":
+            return name + "-" + getOsName().replace(" ", "_") + "-" + getArchName().replace(" ", "_") + ".so";
+        default: {
+            if (getOsName().toLowerCase().contains("mac")) {
+                // Running on Mac, need dynlib files.
+                return name + ".dylib";
+            }
+
+            Matcher libScanner = linuxLibRegex.matcher(name);
+
+            if (libScanner.find()) {
+                if (libScanner.groupCount() > 1 && libScanner.group(2) != null) {
+                    return libScanner.group(1) + ".so" + libScanner.group(2);
+                }
+            }
+
+            return name + ".so";
+        }
+        }
     }
 
     final List<Path> getObjectFiles() {
@@ -94,30 +127,35 @@ final class ObjectTransfer {
 
     final void transfer(String... names) throws IOException {
         for (String name : names) {
+
             String libName = toLibraryName(name);
             Path targetLibraryPath = targetDirectory.resolve(libName);
 
             try (InputStream inputStream = getClass().getResourceAsStream("/objects/" + libName)) {
                 if (inputStream != null) {
                     transferTo(inputStream, targetLibraryPath);
-                    break;
+                    continue;
                 }
             }
 
             try (InputStream inputStream = Files
                     .newInputStream(Paths.get("src/main/resources/objects").resolve(libName))) {
                 transferTo(inputStream, targetLibraryPath);
-                break;
+                continue;
             }
         }
+
+        try {
+        } catch (Exception ex) {
+            System.out.println("Error logging unpacking of jar. Error " + ex.toString());
+        }
+
     }
 
     private void transferTo(InputStream inputStream, Path targetFile) throws IOException {
         Files.copy(inputStream, targetFile);
-        Set<PosixFilePermission> set = new HashSet<>();
-        set.add(PosixFilePermission.OWNER_EXECUTE);
-        set.add(PosixFilePermission.OWNER_READ);
-        Files.setPosixFilePermissions(targetFile, set);
+        Files.setPosixFilePermissions(targetFile,
+                new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.OWNER_READ)));
         libraries.add(targetFile);
     }
 }

@@ -1,11 +1,5 @@
 package de.sfuhrm.openssl4j;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -20,6 +14,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Benchmark testing the speed of multiple algorithm implementations.
@@ -37,9 +35,8 @@ public class SpeedTest {
         List<Integer> bufferSizes = Arrays.asList(1000, 100000, 1000000);
         List<Arguments> result = new ArrayList<>();
         Map<String, Provider> providerMap = new HashMap<>();
-        providerMap.put("OpenSSL", new OpenSSL4JProvider());
+        providerMap.put("OpenSSL", OpenSSL4JProvider.getInstance());
         providerMap.put("Sun", Security.getProvider("SUN"));
-        providerMap.put("BC", new BouncyCastleProvider());
 
         for (Map.Entry<String, Provider> providerEntry : providerMap.entrySet()) {
             for (String messageDigestName : messageDigestNames) {
@@ -71,7 +68,7 @@ public class SpeedTest {
     public void updateWithArray(String provider, String messageDigest, MessageDigest md, String messageDigestName,
             Integer bufferSize) {
         byte[] data = new byte[bufferSize];
-        benchmark(provider, messageDigest, "ByteArray", TIMES, bufferSize, () -> md.update(data));
+        benchmark(benchmarkName, "ByteArray", TIMES, bufferSize, () -> md.update(data));
     }
 
     @ParameterizedTest
@@ -80,7 +77,7 @@ public class SpeedTest {
             Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
-        benchmark(provider, messageDigest, "HeapBB", TIMES, bufferSize, () -> {
+        benchmark(benchmarkName, "HeapBB", TIMES, bufferSize, () -> {
             md.update(byteBuffer);
             byteBuffer.flip();
         });
@@ -92,7 +89,7 @@ public class SpeedTest {
             Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
-        benchmark(provider, messageDigest, "DirectBB", TIMES, bufferSize, () -> {
+        benchmark(benchmarkName, "DirectBB", TIMES, bufferSize, () -> {
             md.update(byteBuffer);
             byteBuffer.flip();
         });
@@ -114,7 +111,7 @@ public class SpeedTest {
         Formatter formatter = new Formatter(System.out, Locale.ENGLISH);
 
         if (first) {
-            formatter.format("Provider;MD;Test;Times;Length;Seconds;Data;SpeedMBPS%n");
+            formatter.format("Bench;Test;Times;Length;Seconds;Data;SpeedMBPS%n");
             first = false;
         }
 

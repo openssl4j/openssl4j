@@ -1,14 +1,9 @@
 package de.sfuhrm.openssl4j;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -32,7 +27,7 @@ public class MessageDigestWithReferenceMDTest extends BaseTest {
         List<String> messageDigestNames = Arrays.asList("MD5", "SHA1", "SHA-224", "SHA-256", "SHA-384", "SHA-512",
                 "SHA-512/224", "SHA-512/256", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512");
         List<Arguments> result = new ArrayList<>();
-        Provider openSsl = new OpenSSL4JProvider();
+        Provider openSsl = OpenSSL4JProvider.getInstance();
         Provider sun = MessageDigest.getInstance("MD5").getProvider();
 
         for (String messageDigestName : messageDigestNames) {

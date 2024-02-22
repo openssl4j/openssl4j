@@ -1,12 +1,8 @@
 package de.sfuhrm.openssl4j;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,8 +10,9 @@ import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test cases that compare the message digest of the implementations with well known expected outputs.
@@ -44,7 +41,7 @@ public class MessageDigestWithKnownHashesTest extends BaseTest {
 
     private static Stream<Arguments> provideTestArguments() throws NoSuchAlgorithmException, IOException {
         List<Arguments> result = new ArrayList<>();
-        Provider openSsl = new OpenSSL4JProvider();
+        Provider openSsl = OpenSSL4JProvider.getInstance();
 
         for (int i = 0; i < REFERENCES.length; i += 3) {
             String algorithm = REFERENCES[i];

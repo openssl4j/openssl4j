@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigestSpi;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -155,9 +153,7 @@ class OpenSSLMessageDigestNative extends MessageDigestSpi {
      * @return a Set of supported message digest algorithms.
      */
     protected static Set<String> getMessageDigestList() {
-        String[] messageDigestAlgorithms = listMessageDigests();
-        Set<String> result = new HashSet<>(Arrays.asList(messageDigestAlgorithms));
-        return result;
+        return new HashSet<>(Arrays.asList(listMessageDigests()));
     }
 
     @Override
