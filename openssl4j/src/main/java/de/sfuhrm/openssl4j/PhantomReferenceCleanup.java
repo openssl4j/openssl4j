@@ -10,9 +10,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Frees native AbstractNative objects (ByteBuffers). The objects are allocated in the constructors for
- * OpenSSLMessageDigestNative, OpenSSLCipherNative, OpenSSLMacNative, and OpenSSLSecureRandomNative and are not used
- * once construction is complete.
+ * Frees native AbstractNative objects. The ByteBuffer objects are allocated in
+ * {@linkplain OpenSSLMessageDigestNative#OpenSSLMessageDigestNative(String)} ()} and are not used any longer.
  *
  * @author Stephan Fuhrmann
  */
@@ -50,7 +49,9 @@ class PhantomReferenceCleanup {
         startIfNeeded();
     }
 
-    /** Checks whether the queue thread is already running and starts it if not. */
+    /**
+     * Checks whether the queue thread is already running and starts it if not.
+     */
     static synchronized void startIfNeeded() {
         if (!running) {
             running = true;
