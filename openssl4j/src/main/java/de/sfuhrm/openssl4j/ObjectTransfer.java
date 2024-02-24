@@ -94,7 +94,7 @@ final class ObjectTransfer {
         return getSystemPropertyAlnum("os.name");
     }
 
-    public static String getArchName() {
+    private static String getArchName() {
         return getSystemPropertyAlnum("os.arch");
     }
 

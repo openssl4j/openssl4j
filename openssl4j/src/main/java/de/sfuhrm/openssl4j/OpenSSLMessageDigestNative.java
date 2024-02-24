@@ -35,7 +35,7 @@ class OpenSSLMessageDigestNative extends MessageDigestSpi {
      *
      * @return an array of supported message digest algorithms from the OpenSSL library.
      */
-    private static native String[] listMessageDigests();
+    private native static String[] listMessageDigests();
 
     /**
      * Returns the context size in bytes. This is used to allocate the {@link #context direct ByteBuffer}.

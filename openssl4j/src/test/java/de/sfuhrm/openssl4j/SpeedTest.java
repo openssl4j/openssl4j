@@ -41,10 +41,10 @@ public class SpeedTest {
         for (Map.Entry<String, Provider> providerEntry : providerMap.entrySet()) {
             for (String messageDigestName : messageDigestNames) {
                 for (Integer bufferSize : bufferSizes) {
-                    String name = providerEntry.getKey() + "-" + messageDigestName;
-                    result.add(
-                            Arguments.of(name, MessageDigest.getInstance(messageDigestName, providerEntry.getValue()),
-                                    messageDigestName, bufferSize));
+                    String name = providerEntry.getKey();
+                    result.add(Arguments.of(name, messageDigestName,
+                            MessageDigest.getInstance(messageDigestName, providerEntry.getValue()), messageDigestName,
+                            bufferSize));
                 }
             }
         }
@@ -54,8 +54,9 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithByte(String benchmarkName, MessageDigest md, String messageDigestName, Integer bufferSize) {
-        benchmark(benchmarkName, "SingleByte", TIMES, bufferSize, () -> {
+    public void updateWithByte(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
+        benchmark(provider, messageDigest, "SingleByte", TIMES, bufferSize, () -> {
             for (int i = 0; i < bufferSize; i++) {
                 md.update((byte) 0);
             }
@@ -64,14 +65,16 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithArray(String benchmarkName, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithArray(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         byte[] data = new byte[bufferSize];
         benchmark(benchmarkName, "ByteArray", TIMES, bufferSize, () -> md.update(data));
     }
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithHeapBB(String benchmarkName, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithHeapBB(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
         benchmark(benchmarkName, "HeapBB", TIMES, bufferSize, () -> {
@@ -82,7 +85,7 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithDirectBB(String benchmarkName, MessageDigest md, String messageDigestName,
+    public void updateWithDirectBB(String provider, String messageDigest, MessageDigest md, String messageDigestName,
             Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
@@ -94,7 +97,7 @@ public class SpeedTest {
 
     static boolean first = true;
 
-    static void benchmark(String benchmarkName, String testName, int times, int length, Runnable r) {
+    static void benchmark(String provider, String messageDigest, String testName, int times, int length, Runnable r) {
         long start = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             r.run();
@@ -112,7 +115,7 @@ public class SpeedTest {
             first = false;
         }
 
-        formatter.format("%s;%s;%d;%d;%g;%g;%g%n", benchmarkName, testName, times, length, seconds, totalData,
-                (totalData / (1024. * 1024.)) / seconds);
+        formatter.format("%s;%s;%s;%d;%d;%g;%g;%g%n", provider, messageDigest, testName, times, length, seconds,
+                totalData, (totalData / (1024. * 1024.)) / seconds);
     }
 }
