@@ -8,6 +8,7 @@ import java.util.Set;
 
 /**
  * Loads the object files.
+ *
  * @author Stephan Fuhrmann
  */
 class NativeLoader {
@@ -16,9 +17,7 @@ class NativeLoader {
 
     private static boolean isLoaded = false;
 
-    static final String[] OBJECTS = {
-            "libopenssl4j"
-    };
+    static final String[] OBJECTS = { "libopenssl4j" };
 
     NativeLoader() {
         loaded = new HashSet<>();
@@ -26,7 +25,9 @@ class NativeLoader {
 
     /**
      * Loads all object files.
-     * @throws IOException if transferring the object files failed.
+     *
+     * @throws IOException
+     *             if transferring the object files failed.
      */
     static void loadAll() throws IOException {
         if (isLoaded) {
