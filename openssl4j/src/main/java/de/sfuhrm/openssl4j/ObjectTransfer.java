@@ -14,9 +14,9 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Transfers the object files from the JAR file
- * to a temporary directory. The temporary directory
- * will be deleted when the JVM shuts down.
+ * Transfers the object files from the JAR file to a temporary directory. The temporary directory will be deleted when
+ * the JVM shuts down.
+ *
  * @author Stephan Fuhrmann
  */
 final class ObjectTransfer {
@@ -47,13 +47,18 @@ final class ObjectTransfer {
         Runtime.getRuntime().addShutdownHook(new Thread(removeTarget));
     }
 
-    /** Gets a system property, enforcing that the value string is alphanumeric.
-     * @param property the name of the property to get.
-     * @return the value of the property consisting of its alphanumeric parts
-     * and the non-alphanumeric parts being replaced with an
-     * underscore character ('_').
-     * @throws NullPointerException if property is null or not set.
-     * */
+    /**
+     * Gets a system property, enforcing that the value string is alphanumeric.
+     *
+     * @param property
+     *            the name of the property to get.
+     *
+     * @return the value of the property consisting of its alphanumeric parts and the non-alphanumeric parts being
+     *         replaced with an underscore character ('_').
+     *
+     * @throws NullPointerException
+     *             if property is null or not set.
+     */
     static String getSystemPropertyAlnum(String property) {
         Objects.requireNonNull(property);
 
@@ -74,7 +79,6 @@ final class ObjectTransfer {
     private static String getOsName() {
         return getSystemPropertyAlnum("os.name");
     }
-
 
     private static String getArchName() {
         return getSystemPropertyAlnum("os.arch");
@@ -100,7 +104,8 @@ final class ObjectTransfer {
                 }
             }
 
-            try (InputStream inputStream = Files.newInputStream(Paths.get("src/main/resources/objects").resolve(libName))) {
+            try (InputStream inputStream = Files
+                    .newInputStream(Paths.get("src/main/resources/objects").resolve(libName))) {
                 transferTo(inputStream, targetLibraryPath);
                 break;
             }

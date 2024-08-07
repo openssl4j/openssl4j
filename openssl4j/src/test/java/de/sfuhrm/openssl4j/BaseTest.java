@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Test base.
+ *
  * @author Stephan Fuhrmann
  */
 public class BaseTest {
