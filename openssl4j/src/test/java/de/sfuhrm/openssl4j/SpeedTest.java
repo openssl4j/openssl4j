@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 /**
  * Benchmark testing the speed of multiple algorithm implementations.
+ *
  * @author Stephan Fuhrmann
  */
 @Disabled
@@ -31,7 +32,8 @@ public class SpeedTest {
     static final int TIMES = 100;
 
     private static Stream<Arguments> provideTestArguments() throws NoSuchAlgorithmException, IOException {
-        List<String> messageDigestNames = Arrays.asList("MD5", "SHA1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "SHA-512/224", "SHA-512/256", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512");
+        List<String> messageDigestNames = Arrays.asList("MD5", "SHA1", "SHA-224", "SHA-256", "SHA-384", "SHA-512",
+                "SHA-512/224", "SHA-512/256", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512");
         List<Integer> bufferSizes = Arrays.asList(1000, 100000, 1000000);
         List<Arguments> result = new ArrayList<>();
         Map<String, Provider> providerMap = new HashMap<>();
@@ -43,11 +45,8 @@ public class SpeedTest {
             for (String messageDigestName : messageDigestNames) {
                 for (Integer bufferSize : bufferSizes) {
                     String name = providerEntry.getKey();
-                    result.add(Arguments.of(
-                            name,
-                            messageDigestName,
-                            MessageDigest.getInstance(messageDigestName, providerEntry.getValue()),
-                            messageDigestName,
+                    result.add(Arguments.of(name, messageDigestName,
+                            MessageDigest.getInstance(messageDigestName, providerEntry.getValue()), messageDigestName,
                             bufferSize));
                 }
             }
@@ -58,7 +57,8 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithByte(String provider, String messageDigest, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithByte(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         benchmark(provider, messageDigest, "SingleByte", TIMES, bufferSize, () -> {
             for (int i = 0; i < bufferSize; i++) {
                 md.update((byte) 0);
@@ -68,14 +68,16 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithArray(String provider, String messageDigest, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithArray(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         byte[] data = new byte[bufferSize];
         benchmark(provider, messageDigest, "ByteArray", TIMES, bufferSize, () -> md.update(data));
     }
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithHeapBB(String provider, String messageDigest, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithHeapBB(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
         benchmark(provider, messageDigest, "HeapBB", TIMES, bufferSize, () -> {
@@ -86,7 +88,8 @@ public class SpeedTest {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithDirectBB(String provider, String messageDigest, MessageDigest md, String messageDigestName, Integer bufferSize) {
+    public void updateWithDirectBB(String provider, String messageDigest, MessageDigest md, String messageDigestName,
+            Integer bufferSize) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufferSize);
         byteBuffer.limit(byteBuffer.capacity());
         benchmark(provider, messageDigest, "DirectBB", TIMES, bufferSize, () -> {
@@ -96,6 +99,7 @@ public class SpeedTest {
     }
 
     static boolean first = true;
+
     static void benchmark(String provider, String messageDigest, String testName, int times, int length, Runnable r) {
         long start = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
@@ -114,14 +118,7 @@ public class SpeedTest {
             first = false;
         }
 
-        formatter.format("%s;%s;%s;%d;%d;%g;%g;%g%n",
-                provider,
-                messageDigest,
-                testName,
-                times,
-                length,
-                seconds,
-                totalData,
-                (totalData / (1024. * 1024.)) / seconds);
+        formatter.format("%s;%s;%s;%d;%d;%g;%g;%g%n", provider, messageDigest, testName, times, length, seconds,
+                totalData, (totalData / (1024. * 1024.)) / seconds);
     }
 }

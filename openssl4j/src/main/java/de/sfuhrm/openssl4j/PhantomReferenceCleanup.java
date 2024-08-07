@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Frees native AbstractNative objects.
- * The ByteBuffer objects are allocated in {@linkplain OpenSSLMessageDigestNative#OpenSSLMessageDigestNative(String)} ()}
- * and are not used any longer.
+ * Frees native AbstractNative objects. The ByteBuffer objects are allocated in
+ * {@linkplain OpenSSLMessageDigestNative#OpenSSLMessageDigestNative(String)} ()} and are not used any longer.
+ *
  * @author Stephan Fuhrmann
  */
 class PhantomReferenceCleanup {
@@ -23,16 +23,19 @@ class PhantomReferenceCleanup {
     /** Is the thread running? */
     private static boolean running = false;
 
-    private static final Set<NativePhantomReference> nativePhantomReferenceList = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<NativePhantomReference> nativePhantomReferenceList = Collections
+            .synchronizedSet(new HashSet<>());
 
     private static class NativePhantomReference extends PhantomReference<Object> {
         private final Consumer<ByteBuffer> freeFunction;
         private final ByteBuffer byteBuffer;
+
         NativePhantomReference(Object abstractNative, Consumer<ByteBuffer> freeFunction, ByteBuffer context) {
             super(abstractNative, BYTE_BUFFER_REFERENCE_QUEUE);
             this.freeFunction = freeFunction;
             this.byteBuffer = context;
         }
+
         public void free() {
             freeFunction.accept(byteBuffer);
         }
@@ -40,24 +43,23 @@ class PhantomReferenceCleanup {
 
     /** Enqueues a AbstractNative for later cleanup. */
     static void enqueueForCleanup(Object ref, Consumer<ByteBuffer> freeFunction, ByteBuffer context) {
-        NativePhantomReference phantomReference = new NativePhantomReference(
-                Objects.requireNonNull(ref),
-                Objects.requireNonNull(freeFunction),
-                Objects.requireNonNull(context));
+        NativePhantomReference phantomReference = new NativePhantomReference(Objects.requireNonNull(ref),
+                Objects.requireNonNull(freeFunction), Objects.requireNonNull(context));
         nativePhantomReferenceList.add(phantomReference);
         startIfNeeded();
     }
 
-    /** Checks whether the queue thread is already
-     * running and starts it if not.
-     * */
+    /**
+     * Checks whether the queue thread is already running and starts it if not.
+     */
     static synchronized void startIfNeeded() {
         if (!running) {
             running = true;
             Runnable r = () -> {
                 try {
                     while (true) {
-                        NativePhantomReference reference = (NativePhantomReference)BYTE_BUFFER_REFERENCE_QUEUE.remove();
+                        NativePhantomReference reference = (NativePhantomReference) BYTE_BUFFER_REFERENCE_QUEUE
+                                .remove();
                         reference.free();
                         nativePhantomReferenceList.remove(reference);
                     }
