@@ -19,26 +19,26 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 /**
- * Test cases that compare the message digest of the
- * Sun provider (aka 'reference') with the implementations
- * in this context (aka 'test').
+ * Test cases that compare the message digest of the Sun provider (aka 'reference') with the implementations in this
+ * context (aka 'test').
+ *
  * @author Stephan Fuhrmann
  */
-public class MessageDigestWithReferenceMDTest extends BaseTest  {
+public class MessageDigestWithReferenceMDTest extends BaseTest {
 
     private static Stream<Arguments> provideTestArguments() throws NoSuchAlgorithmException, IOException {
-        List<String> messageDigestNames = Arrays.asList("MD5", "SHA1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "SHA-512/224", "SHA-512/256", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512");
+        List<String> messageDigestNames = Arrays.asList("MD5", "SHA1", "SHA-224", "SHA-256", "SHA-384", "SHA-512",
+                "SHA-512/224", "SHA-512/256", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512");
         List<Arguments> result = new ArrayList<>();
         Provider openSsl = new OpenSSL4JProvider();
         Provider sun = MessageDigest.getInstance("MD5").getProvider();
 
-            for (String messageDigestName : messageDigestNames) {
-                    result.add(Arguments.of(
-                            messageDigestName,
-                            MessageDigest.getInstance(messageDigestName, openSsl),
-                            MessageDigest.getInstance(messageDigestName, sun)));
-            }
+        for (String messageDigestName : messageDigestNames) {
+            result.add(Arguments.of(messageDigestName, MessageDigest.getInstance(messageDigestName, openSsl),
+                    MessageDigest.getInstance(messageDigestName, sun)));
+        }
 
         return result.stream();
     }
@@ -124,7 +124,8 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithReadOnlyMiddlePositionHeapByteBuffer(String digestName, MessageDigest testMD, MessageDigest referenceMD) {
+    public void updateWithReadOnlyMiddlePositionHeapByteBuffer(String digestName, MessageDigest testMD,
+            MessageDigest referenceMD) {
         final List<ByteBuffer> list = new ArrayList<>();
         applyTo(md -> {
             ByteBuffer bb = ByteBuffer.wrap(franzJagt());
@@ -142,7 +143,8 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithDirectByteBufferNoRemaining(String digestName, MessageDigest testMD, MessageDigest referenceMD) {
+    public void updateWithDirectByteBufferNoRemaining(String digestName, MessageDigest testMD,
+            MessageDigest referenceMD) {
         final List<ByteBuffer> list = new ArrayList<>();
         applyTo(md -> {
             ByteBuffer bb = ByteBuffer.allocateDirect(franzJagt().length);
@@ -195,7 +197,8 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithMiddlePositionDirectByteBuffer(String digestName, MessageDigest testMD, MessageDigest referenceMD) {
+    public void updateWithMiddlePositionDirectByteBuffer(String digestName, MessageDigest testMD,
+            MessageDigest referenceMD) {
         final List<ByteBuffer> list = new ArrayList<>();
         applyTo(md -> {
             ByteBuffer bb = ByteBuffer.allocateDirect(franzJagt().length);
@@ -238,7 +241,7 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
         applyTo(md -> {
             byte[] data = filledArray(1024 * 1024);
             int rounds = 16;
-            for (int i=0; i < rounds; i++) {
+            for (int i = 0; i < rounds; i++) {
                 md.update(data, 0, data.length);
             }
         }, testMD, referenceMD);
@@ -253,7 +256,7 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
             ByteBuffer direct = ByteBuffer.allocateDirect(data.length);
             direct.put(data);
             direct.flip();
-            for (int i=0; i < rounds; i++) {
+            for (int i = 0; i < rounds; i++) {
                 md.update(direct);
             }
         }, testMD, referenceMD);
@@ -295,7 +298,8 @@ public class MessageDigestWithReferenceMDTest extends BaseTest  {
 
     @ParameterizedTest
     @MethodSource("provideTestArguments")
-    public void updateWithReadOnlyBBWalkingPosition(String digestName, MessageDigest testMD, MessageDigest referenceMD) {
+    public void updateWithReadOnlyBBWalkingPosition(String digestName, MessageDigest testMD,
+            MessageDigest referenceMD) {
         int size = 10240;
         for (int i = 0; i < size; i++) {
             final int position = i;

@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 /**
  * Lists the registered Security providers.
+ *
  * @author Stephan Fuhrmann
  */
 public class SunProviderListTest {
@@ -20,10 +21,11 @@ public class SunProviderListTest {
         Arrays.sort(providers, Comparator.comparing(Provider::getName));
         for (Provider provider : providers) {
             System.out.println(provider.getName());
-            TreeSet<Provider.Service> sortedServices = new TreeSet<>(Comparator.comparing(o -> (o.getType() + o.getAlgorithm())));
+            TreeSet<Provider.Service> sortedServices = new TreeSet<>(
+                    Comparator.comparing(o -> (o.getType() + o.getAlgorithm())));
             sortedServices.addAll(provider.getServices());
             for (Provider.Service service : sortedServices) {
-                System.out.println(service.getType()+" - "+service.getClassName()+" - " + service.getAlgorithm());
+                System.out.println(service.getType() + " - " + service.getClassName() + " - " + service.getAlgorithm());
             }
         }
     }
