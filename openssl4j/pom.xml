@@ -47,7 +47,6 @@
                 </artifactItem>
               </artifactItems>
               <outputDirectory>target/openssl4j-objects</outputDirectory>
-              <stripVersion>true</stripVersion>
             </configuration>
           </execution>
         </executions>
