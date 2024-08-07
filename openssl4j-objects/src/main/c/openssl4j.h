@@ -7,10 +7,12 @@
 #define OPENSSL4J_H
 
 #include <jni.h>
+#include <openssl/provider.h>
 
 #define NULL_POINTER_EXCEPTION "java/lang/NullPointerException"
 #define ILLEGAL_STATE_EXCEPTION "java/lang/IllegalStateException"
 #define UNSUPPORTED_OPERATION_EXCEPTION "java/lang/UnsupportedOperationException"
+
 
 struct StringArrayPosition {
     /* The next write index in the array below. */
@@ -23,6 +25,13 @@ struct StringArrayPosition {
     jobjectArray array;
 };
 
+struct OpenSSLProviderHolder {
+    OSSL_PROVIDER *baseProvider;
+    OSSL_PROVIDER *legacyProvider;
+    OSSL_PROVIDER *fipsProvider;
+    OSSL_LIB_CTX *lib;
+};
+
 /*
 * Throws an exception. Actually signals the JVM that an exception shall be thrown.
 * C methods need to terminate normally.
@@ -32,11 +41,18 @@ struct StringArrayPosition {
 */
 void throw_error(JNIEnv *env, const char *exceptionClassName, const char *message);
 
+
+void throwErrorWithOpenSSLInternalError(JNIEnv *env, const char *exceptionClassName, const char *message);
+
 /*
 * Returns the MD / Crypto context from a passed in ByteBuffer jobject.
 * @param env the JNI environment.
 * @param context a pointer to the context ByteBuffer object.
 */
 void* get_context_from(JNIEnv *env, jobject context);
+
+EVP_MD* GetMessageDigest(const char* OriginalName, long libCtx);
+
+unsigned long long createOpenSSLLibNative(int setFips, const char* confLocation, const char* libLocations, int *errCode);
 
 #endif
