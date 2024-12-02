@@ -9,7 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/evp.h>
+
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#elif __linux__
 #include <malloc.h>
+#endif
 
 #include "openssl4j.h"
 
@@ -101,14 +106,19 @@ JNIEXPORT jobject JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_na
     EVP_MD_CTX *mdctx;
 
 	if ((mdctx = OPENSSL_MD_NEW_FUNC()) == NULL) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "Could not allocate context");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "Could not allocate context");
         return NULL;
 	}
 
+#ifdef __APPLE__
+    size_t usableSize = malloc_size(mdctx);
+#elif __linux__
     size_t usableSize = malloc_usable_size(mdctx);
+#endif
+
     jobject result = (*env)->NewDirectByteBuffer(env, mdctx, usableSize);
     if (result == NULL) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "Could not NewDirectByteBuffer()");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "Could not NewDirectByteBuffer()");
     }
 
     return result;
@@ -119,7 +129,7 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
       EVP_MD_CTX* context_data = get_context_from(env, context);
       if (context_data != NULL) {
   	    if (1 != EVP_DigestUpdate(context_data, &byteData, 1)) {
-             throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
+             throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
   	    }
       }
 }
@@ -127,7 +137,7 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
 JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativeUpdateWithByteArray
   (JNIEnv *env, jobject obj, jobject context, jbyteArray jarray, jint offset, jint length) {
     if (jarray == NULL) {
-        throw_error(env, NULL_POINTER_EXCEPTION, "array is NULL");
+        throwErrorWithOpenSSLInternalError(env, NULL_POINTER_EXCEPTION, "array is NULL");
         return;
     }
 
@@ -139,12 +149,12 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
         jbyte *carray = (*env)->GetByteArrayElements(env, jarray, &isCopy);
         if (carray != NULL) {
     	    if (1 != EVP_DigestUpdate(context_data, carray + offset, length)) {
-               throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
+               throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
 	        }
             /* JNI_ABORT: Don't copy back the array, nothing has changed */
             (*env)->ReleaseByteArrayElements(env, jarray, carray, JNI_ABORT);
         } else {
-            throw_error(env, ILLEGAL_STATE_EXCEPTION, "GetByteArrayElements for array failed");
+            throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "GetByteArrayElements for array failed");
         }
     }
 }
@@ -152,7 +162,7 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
 JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativeUpdateWithByteBuffer
   (JNIEnv *env, jobject obj, jobject context, jobject bb, jint offset, jint length) {
     if (bb == NULL) {
-        throw_error(env, NULL_POINTER_EXCEPTION, "ByteBuffer is NULL");
+        throwErrorWithOpenSSLInternalError(env, NULL_POINTER_EXCEPTION, "ByteBuffer is NULL");
         return;
     }
     EVP_MD_CTX* context_data = get_context_from(env, context);
@@ -162,10 +172,10 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
             jbyte* offset_buffer = buffer + offset;
 
     	    if (1 != EVP_DigestUpdate(context_data, offset_buffer, length)) {
-               throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
+               throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestUpdate failed");
 	        }
         } else {
-            throw_error(env, ILLEGAL_STATE_EXCEPTION, "GetDirectBufferAddress for ByteBuffer failed");
+            throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "GetDirectBufferAddress for ByteBuffer failed");
         }
     }
 }
@@ -174,14 +184,14 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
   (JNIEnv *env, jobject obj, jobject context, jbyteArray jdigest) {
     EVP_MD_CTX* context_data = get_context_from(env, context);
     if (jdigest == NULL) {
-        throw_error(env, NULL_POINTER_EXCEPTION, "Digest array is NULL");
+        throwErrorWithOpenSSLInternalError(env, NULL_POINTER_EXCEPTION, "Digest array is NULL");
         return;
     }
     if (context_data != NULL) {
         jbyte cdigest[EVP_MAX_MD_SIZE];
         unsigned int actualSize;
   	    if (1 != EVP_DigestFinal_ex(context_data, (unsigned char*)cdigest, &actualSize)) {
-            throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestFinal_ex failed");
+            throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestFinal_ex failed");
 	    }
         (*env)->SetByteArrayRegion(env, jdigest, 0, actualSize, cdigest);
     }
@@ -190,12 +200,12 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
 JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativeInit
   (JNIEnv *env, jobject obj, jobject context, jstring jalgoName) {
     if (jalgoName == NULL) {
-        throw_error(env, NULL_POINTER_EXCEPTION, "Algorithm name is NULL");
+        throwErrorWithOpenSSLInternalError(env, NULL_POINTER_EXCEPTION, "Algorithm name is NULL");
         return;
     }
     EVP_MD_CTX* context_data = get_context_from(env, context);
     if (context_data == NULL) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestInit_ex failed");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestInit_ex failed");
         return;
      }
 
@@ -203,7 +213,7 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
 
     char javaNameC[256];
     if (nameLength > sizeof(javaNameC)) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "Algorithm name exceeds the limit");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "Algorithm name exceeds the limit");
         return;
     }
 
@@ -214,12 +224,12 @@ JNIEXPORT void JNICALL Java_de_sfuhrm_openssl4j_OpenSSLMessageDigestNative_nativ
 
     const EVP_MD *evp_md = EVP_get_digestbyname(javaNameC);
     if (evp_md == NULL) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "Named MessageDigest was not found");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "Named MessageDigest was not found");
         return;
     }
 
     if (1 != EVP_DigestInit_ex(context_data, evp_md, NULL)) {
-        throw_error(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestInit_ex failed");
+        throwErrorWithOpenSSLInternalError(env, ILLEGAL_STATE_EXCEPTION, "EVP_DigestInit_ex failed");
         return;
     }
 }
